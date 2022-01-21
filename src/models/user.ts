@@ -1,8 +1,9 @@
-import type { Effect, Reducer } from 'umi';
+import type {Effect, Reducer} from 'umi';
 
-import { queryCurrent, query as queryUsers } from '@/services/user';
+import {queryCurrent} from '@/services/user';
 
 export type CurrentUser = {
+  id?: string;
   avatar?: string;
   name?: string;
   title?: string;
@@ -12,7 +13,6 @@ export type CurrentUser = {
     key: string;
     label: string;
   }[];
-  userid?: string;
   unreadCount?: number;
 };
 
@@ -33,50 +33,48 @@ export type UserModelType = {
   };
 };
 
+
 const UserModel: UserModelType = {
   namespace: 'user',
 
   state: {
     currentUser: {},
   },
-
+// @ts-ignore
   effects: {
-    *fetch(_, { call, put }) {
-      const response = yield call(queryUsers);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-    },
-    *fetchCurrent(_, { call, put }) {
-      const response = yield call(queryCurrent);
+    // * fetch(_, {call, put}) {
+    //   const response = yield call(queryUsers);
+    //   yield put({
+    //     type: 'save',
+    //     payload: response,
+    //   });
+    // },
+    //获取当前登录用户数据
+    * fetchCurrent(_, {call, put}) {
+      const userInfo = localStorage.getItem('userInfo')
+      let response = {}
+      if (!userInfo) {
+        response = yield call(queryCurrent);
+        //把用户信息存入到local
+        localStorage.setItem('userInfo', JSON.stringify(response))
+      } else {
+        response = JSON.parse(userInfo)
+      }
+
       yield put({
         type: 'saveCurrentUser',
         payload: response,
       });
     },
-  },
 
+
+  },
+// @ts-ignore
   reducers: {
     saveCurrentUser(state, action) {
       return {
         ...state,
         currentUser: action.payload || {},
-      };
-    },
-    changeNotifyCount(
-      state = {
-        currentUser: {},
-      },
-      action,
-    ) {
-      return {
-        ...state,
-        currentUser: {
-          ...state.currentUser,
-          notifyCount: action.payload.totalCount,
-          unreadCount: action.payload.unreadCount,
-        },
       };
     },
   },

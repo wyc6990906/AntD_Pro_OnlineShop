@@ -1,11 +1,9 @@
-import { stringify } from 'querystring';
-import type { Reducer, Effect } from 'umi';
-import { history } from 'umi';
+import type {Reducer, Effect} from 'umi';
+import {history} from 'umi';
 
-import { fakeAccountLogin } from '@/services/login';
-import { setAuthority } from '@/utils/authority';
-import { getPageQuery } from '@/utils/utils';
-import { message } from 'antd';
+import {fakeAccountLogin} from '@/services/login';
+import {message} from 'antd';
+import {logout} from "@/services/login";
 
 export type StateType = {
   status?: 'ok' | 'error';
@@ -25,6 +23,7 @@ export type LoginModelType = {
   };
 };
 
+// @ts-ignore
 const Model: LoginModelType = {
   namespace: 'login',
 
@@ -33,60 +32,49 @@ const Model: LoginModelType = {
   },
 
   effects: {
-    *login({ payload }, { call, put }) {
+    * login({payload}, {call, put}) {
+      //发送请求执行登录
       const response = yield call(fakeAccountLogin, payload);
-      yield put({
-        type: 'changeLoginStatus',
-        payload: response,
-      });
-      // Login successfully
-      if (response.status === 'ok') {
-        const urlParams = new URL(window.location.href);
-        const params = getPageQuery();
+      if (response.status == undefined) {
+        yield put({
+          type: 'changeLoginStatus',
+          payload: response,
+        });
+
         message.success('🎉 🎉 🎉  登录成功！');
-        let { redirect } = params as { redirect: string };
-        if (redirect) {
-          const redirectUrlParams = new URL(redirect);
-          if (redirectUrlParams.origin === urlParams.origin) {
-            redirect = redirect.substr(urlParams.origin.length);
-            if (window.routerBase !== '/') {
-              redirect = redirect.replace(window.routerBase, '/');
-            }
-            if (redirect.match(/^\/.*#/)) {
-              redirect = redirect.substr(redirect.indexOf('#') + 1);
-            }
-          } else {
-            window.location.href = '/';
-            return;
-          }
-        }
-        history.replace(redirect || '/');
+        history.replace('/');
       }
     },
 
-    logout() {
-      const { redirect } = getPageQuery();
-      // Note: There may be security issues, please note
-      if (window.location.pathname !== '/user/login' && !redirect) {
-        history.replace({
-          pathname: '/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
-        });
+    * logout(_, {call}) {
+     const loading = message.loading('正在退出....')
+      //请求api 退出登录
+      const response = yield call(logout)
+      if(response.status ===undefined){
+        //删除本地存储的token和userInfo
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('userInfo')
+        message.success('🎉 🎉 🎉  退出成功！');
+        history.replace('/login')
       }
+      loading()
     },
   },
 
   reducers: {
-    changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+    changeLoginStatus(state, {payload}) {
+      //将token 存入localstorage
+      localStorage.setItem('access_token', payload.access_token)
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
       };
     },
+    // @ts-ignore
+    logout(state, action) {
+      return {
+        ...state,
+      }
+    }
   },
 };
 

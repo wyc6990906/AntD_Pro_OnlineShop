@@ -50,12 +50,12 @@ const errorHandler = async (error: { response: Response }): Promise<Response> =>
 const request = extend({
   errorHandler, // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
-  prefix:'/api'
+  prefix: '/api'
 });
 
 //添加请求Header头拦截器
 request.interceptors.request.use((url, options) => {
-  const token = 'Coco'
+  const token = localStorage.getItem('access_token') || ''
   const headers = {
     Authorization: `Bearer ${token}`
   }

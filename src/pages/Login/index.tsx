@@ -1,21 +1,16 @@
 import {
-  AlipayCircleOutlined,
   LockOutlined,
-  MailOutlined,
-  MobileOutlined,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
 } from '@ant-design/icons';
-import {Alert, Space, message, Tabs} from 'antd';
-import React, {useState} from 'react';
-import ProForm, {ProFormCaptcha, ProFormCheckbox, ProFormText} from '@ant-design/pro-form';
+import {Tabs} from 'antd';
+import React, {useEffect} from 'react';
+import ProForm, {ProFormText} from '@ant-design/pro-form';
 import {useIntl, connect, FormattedMessage} from 'umi';
-import {getFakeCaptcha} from '@/services/login';
 import type {Dispatch} from 'umi';
 import type {StateType} from '@/models/login';
 import type {LoginParamsType} from '@/services/login';
 import type {ConnectState} from '@/models/connect';
+import {history} from "umi";
 
 import styles from './index.less';
 
@@ -25,30 +20,23 @@ export type LoginProps = {
   submitting?: boolean;
 };
 
-const LoginMessage: React.FC<{
-  content: string;
-}> = ({content}) => (
-  <Alert
-    style={{
-      marginBottom: 24,
-    }}
-    message={content}
-    type="error"
-    showIcon
-  />
-);
 
 const Login: React.FC<LoginProps> = (props) => {
-  const {userLogin = {}, submitting} = props;
-  const {status, type: loginType} = userLogin;
-  const [type, setType] = useState<string>('account');
+  useEffect(() => {
+    //如果已经登陆了 直接去首页 不能看到登录页面
+    const userInfo = localStorage.getItem('userInfo')
+    if(userInfo){
+     history.replace('/')
+    }
+  }, [])
+  const {submitting} = props;
   const intl = useIntl();
 
   const handleSubmit = (values: LoginParamsType) => {
     const {dispatch} = props;
     dispatch({
       type: 'login/login',
-      payload: {...values, type},
+      payload: {...values},
     });
   };
   return (
@@ -72,46 +60,38 @@ const Login: React.FC<LoginProps> = (props) => {
           return Promise.resolve();
         }}
       >
-        <Tabs activeKey={type} onChange={setType}>
+        <Tabs activeKey={"account"}>
           <Tabs.TabPane
             key="account"
             tab={intl.formatMessage({
               id: 'pages.login.accountLogin.tab',
-              defaultMessage: '账户密码登录',
+              defaultMessage: '邮箱/密码登录',
             })}
           />
         </Tabs>
-
-        {status === 'error' && !submitting && (
-          <LoginMessage
-            content={intl.formatMessage({
-              id: 'pages.login.accountLogin.errorMessage',
-              defaultMessage: '账户或密码错误（admin/ant.design)',
-            })}
-          />
-        )}
-        {type === 'account' && (
+        {(
           <>
             <ProFormText
-              name="userName"
+              name="email"
               fieldProps={{
                 size: 'large',
                 prefix: <UserOutlined className={styles.prefixIcon}/>,
               }}
-              placeholder={intl.formatMessage({
-                id: 'pages.login.username.placeholder',
-                defaultMessage: '用户名: admin or user',
-              })}
+              placeholder={'邮箱:super@a.com'}
               rules={[
                 {
                   required: true,
                   message: (
                     <FormattedMessage
                       id="pages.login.username.required"
-                      defaultMessage="请输入用户名!"
+                      defaultMessage="请输入邮箱!"
                     />
                   ),
                 },
+                {
+                  type: 'email',
+                  message: '请输入合法的邮箱地址'
+                }
               ]}
             />
             <ProFormText.Password
@@ -120,10 +100,7 @@ const Login: React.FC<LoginProps> = (props) => {
                 size: 'large',
                 prefix: <LockOutlined className={styles.prefixIcon}/>,
               }}
-              placeholder={intl.formatMessage({
-                id: 'pages.login.password.placeholder',
-                defaultMessage: '密码: ant.design',
-              })}
+              placeholder={'密码:123123'}
               rules={[
                 {
                   required: true,
