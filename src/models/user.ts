@@ -60,6 +60,14 @@ const UserModel: UserModelType = {
       } else {
         response = JSON.parse(userInfo)
       }
+      // let userInfo = localStorage.getItem('userInfo')
+      // if (!userInfo) {
+      //   userInfo = yield call(queryCurrent);
+      //   // @ts-ignore
+      //   if (userInfo.id !== undefined) {
+      //     localStorage.setItem('userInfo', JSON.stringify(userInfo))
+      //   }
+      // }
 
       yield put({
         type: 'saveCurrentUser',

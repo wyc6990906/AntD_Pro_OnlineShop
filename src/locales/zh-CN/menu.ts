@@ -7,7 +7,6 @@ export default {
   'menu.login': '登录',
   'menu.register': '注册',
   'menu.register.result': '注册结果',
-  'menu.dashboard': 'Dashboard',
   'menu.dashboard.analysis': '分析页',
   'menu.dashboard.monitor': '监控页',
   'menu.dashboard.workplace': '工作台',
@@ -50,9 +49,5 @@ export default {
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
   // dylan wang
-  'menu.new': '新空白页',
-  'menu.person': '人员管理',
-  'menu.todo': '待办事项',
-  'menu.slaves':'女神汇',
-  'menu.MyTodo':'我的待办'
+  'menu.dashboard': '统计面板',
 };
