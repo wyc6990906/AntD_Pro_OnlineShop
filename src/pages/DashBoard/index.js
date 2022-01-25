@@ -12,7 +12,6 @@ const DashBoard = () => {
       setDashBoardData(response)
     })
   }, [])
-  console.log(dashBoardData)
 
   return (
     <PageContainer>

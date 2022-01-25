@@ -50,4 +50,5 @@ export default {
   'menu.editor.koni': '拓扑编辑器',
   // dylan wang
   'menu.dashboard': '统计面板',
+  'menu.user': '用户管理',
 };
